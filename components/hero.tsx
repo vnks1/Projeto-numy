@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { RainbowButton } from "@/components/ui/rainbow-button";
 import { WAITLIST_URL } from "@/lib/site-config";
 import iphoneImg from "../src/iphone.png";
@@ -56,7 +57,12 @@ export function Hero() {
                                 transition={{ delay: 0.5, duration: 0.6 }}
                                 className="hidden sm:flex absolute left-[-90px] top-[65%] items-center gap-[6px] bg-white/90 backdrop-blur-sm border border-white/20 shadow-lg px-[12px] py-[6px] rounded-full z-20"
                             >
-                                <Image src="/Rectangle.gif" alt="Ícone da bolha" width={24} height={24} className="w-6 h-6 object-contain" />
+                                <DotLottieReact
+                                    src="https://lottie.host/8084e342-8444-4476-b961-bb906d45b29d/yr4NteD52G.lottie"
+                                    loop
+                                    autoplay
+                                    className="w-6 h-6 object-contain"
+                                />
                                 <span className="text-[12px] font-medium text-gray-800 whitespace-nowrap">Respondendo Davi Marson</span>
                             </motion.div>
 
@@ -67,7 +73,12 @@ export function Hero() {
                                 transition={{ delay: 0.7, duration: 0.6 }}
                                 className="hidden sm:flex absolute right-[-90px] top-[30%] items-center gap-[6px] bg-white/90 backdrop-blur-sm border border-white/20 shadow-lg px-[12px] py-[6px] rounded-full z-20"
                             >
-                                <Image src="/Rectangle.gif" alt="Ícone da bolha" width={24} height={24} className="w-6 h-6 object-contain" />
+                                <DotLottieReact
+                                    src="https://lottie.host/8084e342-8444-4476-b961-bb906d45b29d/yr4NteD52G.lottie"
+                                    loop
+                                    autoplay
+                                    className="w-6 h-6 object-contain"
+                                />
                                 <span className="text-[12px] font-medium text-gray-800 whitespace-nowrap">Resumindo últimas mensagens...</span>
                             </motion.div>
                         </motion.div>
