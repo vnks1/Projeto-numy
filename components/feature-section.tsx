@@ -57,7 +57,7 @@ export function FeatureCard({ children }: { children?: React.ReactNode }) {
                     backgroundSize: "32px 32px",
                 }}
             />
-            <div className="relative z-10">{children}</div>
+            <div className="absolute inset-0 z-10 flex items-center justify-center">{children}</div>
         </div>
     );
 }
