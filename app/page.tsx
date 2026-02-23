@@ -9,15 +9,17 @@ import { ScrollReveal } from "@/components/scroll-reveal";
 // Feature section visuals
 function Feature1Visual() {
   return (
-    <video
-      src="/video1.webm"
-      autoPlay
-      muted
-      loop
-      playsInline
-      preload="metadata"
-      className="w-full max-w-[420px] aspect-[4/3] rounded-3xl border border-gray-100 shadow-sm object-cover"
-    />
+    <FeatureCard>
+      <div className="absolute inset-0">
+        <Image
+          src="/gif1.gif"
+          alt="Clareza no meio do caos"
+          fill
+          unoptimized
+          className="w-full h-full object-cover"
+        />
+      </div>
+    </FeatureCard>
   );
 }
 
