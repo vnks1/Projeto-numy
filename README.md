@@ -16,6 +16,36 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Production setup
+
+1. Configure environment variables in `.env.local`:
+
+- `MONGODB_URI`
+- `MONGODB_DB`
+- `MONGODB_WAITLIST_COLLECTION`
+- `IP_HASH_SALT`
+- `UPSTASH_REDIS_REST_URL`
+- `UPSTASH_REDIS_REST_TOKEN`
+
+2. Run preflight checks before deploy:
+
+```bash
+npm run preflight:prod
+```
+
+Expected output:
+
+```bash
+PROD_PREFLIGHT_OK
+```
+
+3. Build and start:
+
+```bash
+npm run build
+npm run start
+```
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

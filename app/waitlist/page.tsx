@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
+import { Suspense } from "react";
 import { WaitlistForm } from "@/components/waitlist-form";
 
 export const metadata: Metadata = {
@@ -12,7 +11,6 @@ export const metadata: Metadata = {
 export default function WaitlistPage() {
   return (
     <>
-      {/* Background Flare — fixed behind everything, visible through transparent header */}
       <div
         className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[900px] pointer-events-none select-none"
         style={{ zIndex: 0 }}
@@ -28,42 +26,30 @@ export default function WaitlistPage() {
         />
       </div>
 
-      <Header />
-      <main className="relative">
-        <section
-          className="relative z-10 min-h-[calc(100vh-64px)] py-16"
-        >
-          <div className="grid-container">
-            <div className="grid items-center gap-10">
-              <div className="col-span-12 lg:col-span-5">
-                <div className="flex flex-col">
-                  <h1 className="text-[28px] font-semibold text-[#111827] sm:text-[32px]">
-                    Garanta seu acesso antecipado!
-                  </h1>
-                  <p className="mt-3 text-base text-[#6B7280]">
-                    Seja um dos primeiros a desbravar um novo conceito de assistente virtual.
-                  </p>
-                  <WaitlistForm />
-                </div>
-              </div>
-              <div className="col-span-12 lg:col-span-7">
-                <div className="relative overflow-hidden rounded-[28px] border border-white/60 bg-white/70 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#E0F2FE] via-transparent to-[#FDE68A] opacity-60" />
-                  <Image
-                    src="/waitlist-placeholder.svg"
-                    alt="Visualização do produto NUMA"
-                    width={980}
-                    height={760}
-                    className="relative z-10 h-auto w-full object-cover"
-                    priority
-                  />
-                </div>
-              </div>
-            </div>
+      <main className="relative z-10 flex min-h-screen w-full flex-col overflow-hidden bg-transparent md:flex-row">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(2,6,23,0.08)_1px,transparent_0)] [background-size:18px_18px] opacity-30" />
+
+        <section className="relative z-10 flex w-full items-center justify-center px-6 py-16 md:w-1/2 md:px-12 lg:px-20">
+          <div className="w-full max-w-[460px]">
+            <Suspense fallback={null}>
+              <WaitlistForm />
+            </Suspense>
+          </div>
+        </section>
+
+        <section className="relative hidden w-1/2 items-center justify-center overflow-hidden border-l border-zinc-200/70 bg-[rgba(134,134,134,0.05)] md:flex">
+          <div className="absolute inset-0 backdrop-blur-[1px]" />
+          <div className="relative z-10 ml-auto h-[88vh] w-[92%] overflow-hidden">
+            <Image
+              src="/mockup.png"
+              alt="Mockup da interface"
+              fill
+              className="object-contain object-right"
+              priority
+            />
           </div>
         </section>
       </main>
-      <Footer />
     </>
   );
 }

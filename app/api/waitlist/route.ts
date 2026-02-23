@@ -6,7 +6,6 @@ import { getWaitlistRatelimit } from "@/lib/ratelimit";
 type WaitlistPayload = {
   email?: string;
   name?: string | null;
-  turnstileToken?: string;
   utm?: {
     source?: string;
     medium?: string;
@@ -97,33 +96,6 @@ function getIpHash(headers: Headers, salt: string) {
   return createHash("sha256").update(`${salt}${ip}`).digest("hex");
 }
 
-async function verifyTurnstile(token: string, ip: string | null) {
-  const secret = process.env.TURNSTILE_SECRET_KEY;
-  if (!secret) {
-    throw new Error("Missing TURNSTILE_SECRET_KEY");
-  }
-
-  const form = new URLSearchParams();
-  form.append("secret", secret);
-  form.append("response", token);
-  if (ip) {
-    form.append("remoteip", ip);
-  }
-
-  const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-    method: "POST",
-    headers: { "content-type": "application/x-www-form-urlencoded" },
-    body: form,
-    cache: "no-store",
-  });
-
-  if (!response.ok) {
-    return { success: false };
-  }
-
-  return response.json() as Promise<{ success: boolean }>;
-}
-
 export async function POST(request: Request) {
   let payload: WaitlistPayload;
 
@@ -196,34 +168,6 @@ export async function POST(request: Request) {
     if (!success) {
       return NextResponse.json({ error: "Rate limited", code: "RATE_LIMITED" }, { status: 429 });
     }
-  }
-
-  const turnstileToken = typeof payload.turnstileToken === "string" ? payload.turnstileToken : "";
-  if (!turnstileToken) {
-    return NextResponse.json(
-      { error: "Bot verification failed", code: "BOT_VERIFICATION_FAILED" },
-      { status: 400 }
-    );
-  }
-
-  try {
-    const verification = await verifyTurnstile(turnstileToken, clientIp);
-    if (!verification.success) {
-      return NextResponse.json(
-        { error: "Bot verification failed", code: "BOT_VERIFICATION_FAILED" },
-        { status: 400 }
-      );
-    }
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Turnstile error";
-    const isMissingSecret = message.includes("TURNSTILE_SECRET_KEY");
-    return NextResponse.json(
-      {
-        error: isMissingSecret ? "Server misconfigured" : "Bot verification failed",
-        code: isMissingSecret ? "TURNSTILE_SECRET_MISSING" : "BOT_VERIFICATION_FAILED",
-      },
-      { status: isMissingSecret ? 500 : 400 }
-    );
   }
 
   try {

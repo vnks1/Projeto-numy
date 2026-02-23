@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 
 type Status = "idle" | "loading" | "success" | "error";
@@ -15,10 +15,9 @@ type UTM = {
 
 const EMAIL_ERROR = "Digite um e-mail válido.";
 const DOMAIN_ERROR = "Esse tipo de E-mail não é permitido";
-const TURNSTILE_ERROR = "Confirme o captcha para continuar.";
 const RATE_LIMIT_ERROR = "Muitas tentativas. Aguarde alguns minutos e tente novamente.";
 const DB_ERROR = "Configure o banco de dados para concluir o cadastro.";
-const CONFIG_ERROR = "Configuração incompleta. Tente novamente mais tarde.";
+const SERVER_CONFIG_ERROR = "Configuração do servidor incompleta. Tente novamente mais tarde.";
 const GENERIC_ERROR = "Algo deu errado. Tente novamente em instantes.";
 
 const MAX_NAME_LENGTH = 80;
@@ -31,24 +30,6 @@ const ALLOWED_EMAIL_DOMAINS = new Set([
   "outlook.com",
 ]);
 
-declare global {
-  interface Window {
-    turnstile?: {
-      render: (
-        container: HTMLElement,
-        options: {
-          sitekey: string;
-          callback: (token: string) => void;
-          "error-callback"?: () => void;
-          "expired-callback"?: () => void;
-        }
-      ) => string;
-      reset?: (widgetId: string) => void;
-      remove?: (widgetId: string) => void;
-    };
-  }
-}
-
 export function WaitlistForm() {
   const searchParams = useSearchParams();
   const [name, setName] = useState("");
@@ -56,83 +37,10 @@ export function WaitlistForm() {
   const [status, setStatus] = useState<Status>("idle");
   const [errorMessage, setErrorMessage] = useState("");
   const [referrer, setReferrer] = useState<string | null>(null);
-  const [turnstileToken, setTurnstileToken] = useState("");
-  const widgetRef = useRef<HTMLDivElement>(null);
-  const widgetIdRef = useRef<string | null>(null);
-  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
 
   useEffect(() => {
     setReferrer(document.referrer || null);
   }, []);
-
-  useEffect(() => {
-    if (!siteKey || !widgetRef.current) {
-      return;
-    }
-
-    let isMounted = true;
-
-    const renderWidget = () => {
-      if (!isMounted || !widgetRef.current || !window.turnstile) {
-        return;
-      }
-
-      if (widgetIdRef.current) {
-        window.turnstile.reset?.(widgetIdRef.current);
-        return;
-      }
-
-      widgetIdRef.current = window.turnstile.render(widgetRef.current, {
-        sitekey: siteKey,
-        callback: (token) => {
-          setTurnstileToken(token);
-        },
-        "error-callback": () => {
-          setTurnstileToken("");
-          setErrorMessage(TURNSTILE_ERROR);
-          setStatus("error");
-        },
-        "expired-callback": () => {
-          setTurnstileToken("");
-        },
-      });
-    };
-
-    if (window.turnstile) {
-      renderWidget();
-      return () => {
-        isMounted = false;
-      };
-    }
-
-    const existingScript = document.querySelector<HTMLScriptElement>(
-      "script[data-turnstile]"
-    );
-
-    if (existingScript) {
-      existingScript.addEventListener("load", renderWidget, { once: true });
-      return () => {
-        isMounted = false;
-        existingScript.removeEventListener("load", renderWidget);
-      };
-    }
-
-    const script = document.createElement("script");
-    script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
-    script.async = true;
-    script.defer = true;
-    script.setAttribute("data-turnstile", "true");
-    script.addEventListener("load", renderWidget, { once: true });
-    document.body.appendChild(script);
-
-    return () => {
-      isMounted = false;
-      script.removeEventListener("load", renderWidget);
-      if (widgetIdRef.current) {
-        window.turnstile?.remove?.(widgetIdRef.current);
-      }
-    };
-  }, [siteKey]);
 
   const utm = useMemo<UTM>(() => {
     return {
@@ -169,18 +77,6 @@ export function WaitlistForm() {
       return;
     }
 
-    if (!siteKey) {
-      setErrorMessage(CONFIG_ERROR);
-      setStatus("error");
-      return;
-    }
-
-    if (!turnstileToken) {
-      setErrorMessage(TURNSTILE_ERROR);
-      setStatus("error");
-      return;
-    }
-
     setStatus("loading");
 
     try {
@@ -192,7 +88,6 @@ export function WaitlistForm() {
           email: emailValue,
           utm,
           referrer,
-          turnstileToken,
         }),
       });
 
@@ -201,16 +96,13 @@ export function WaitlistForm() {
         const error =
           payload?.code === "INVALID_EMAIL_DOMAIN"
             ? DOMAIN_ERROR
-            : payload?.code === "BOT_VERIFICATION_FAILED"
-              ? TURNSTILE_ERROR
-              : payload?.code === "RATE_LIMITED"
+            : payload?.code === "RATE_LIMITED"
                 ? RATE_LIMIT_ERROR
                 : payload?.code === "DB_NOT_CONFIGURED"
                   ? DB_ERROR
                   : payload?.code === "IP_HASH_SALT_MISSING" ||
-                      payload?.code === "TURNSTILE_SECRET_MISSING" ||
-                      payload?.code === "RATE_LIMIT_NOT_CONFIGURED"
-                    ? CONFIG_ERROR
+                    payload?.code === "RATE_LIMIT_NOT_CONFIGURED"
+                      ? SERVER_CONFIG_ERROR
                     : payload?.error === "Invalid email" || payload?.code === "INVALID_EMAIL"
                       ? EMAIL_ERROR
                       : GENERIC_ERROR;
@@ -229,12 +121,14 @@ export function WaitlistForm() {
   if (status === "success") {
     return (
       <div
-        className="mt-8 w-full max-w-[420px] rounded-2xl border border-gray-200 bg-white px-6 py-5 shadow-sm"
+        className="flex w-full flex-col gap-1.5"
         role="status"
         aria-live="polite"
       >
-        <h3 className="text-lg font-semibold text-[#111827]">Cadastro confirmado!</h3>
-        <p className="mt-2 text-sm text-[#6B7280]">
+        <h1 className="text-[24px] font-bold leading-[32px] tracking-[-0.288px] text-zinc-900">
+          Cadastro confirmado!
+        </h1>
+        <p className="max-w-[430px] text-[18px] leading-[24px] text-zinc-600">
           Em breve enviaremos novidades sobre a Numa. Fique de olho no seu e-mail.
         </p>
       </div>
@@ -242,81 +136,84 @@ export function WaitlistForm() {
   }
 
   return (
-    <form className="mt-8 flex w-full max-w-[420px] flex-col gap-5" onSubmit={handleSubmit}>
-      <div className="flex flex-col gap-2">
-        <label htmlFor="waitlist-name" className="text-sm font-medium text-[#111827]">
-          Nome
-        </label>
-        <div className="relative">
-          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#9CA3AF]">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path
-                d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5Zm0 2c-3.314 0-6 2.239-6 5v1h12v-1c0-2.761-2.686-5-6-5Z"
-                fill="currentColor"
-              />
-            </svg>
-          </span>
-          <input
-            id="waitlist-name"
-            name="name"
-            type="text"
-            autoComplete="name"
-            maxLength={MAX_NAME_LENGTH}
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-10 pr-4 text-sm text-[#111827] shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[#111827]/20"
-            placeholder="Seu nome"
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <label htmlFor="waitlist-email" className="text-sm font-medium text-[#111827]">
-          E-mail
-        </label>
-        <div className="relative">
-          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#9CA3AF]">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path
-                d="M4 6h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Zm0 2v.511l8 4.8 8-4.8V8H4Zm16 8v-5.089l-7.438 4.463a1 1 0 0 1-1.124 0L4 10.911V16h16Z"
-                fill="currentColor"
-              />
-            </svg>
-          </span>
-          <input
-            id="waitlist-email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            required
-            maxLength={MAX_EMAIL_LENGTH}
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-10 pr-4 text-sm text-[#111827] shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[#111827]/20"
-            placeholder="seuemail@exemplo.com"
-          />
-        </div>
-      </div>
-
-      {status === "error" && (
-        <p className="text-sm text-red-600" role="alert">
-          {errorMessage}
+    <div className="flex w-full flex-col">
+      <div className="mb-8 flex flex-col gap-1.5">
+        <h1 className="text-[24px] font-bold leading-[32px] tracking-[-0.288px] text-zinc-900">
+          Garanta seu acesso antecipado!
+        </h1>
+        <p className="max-w-[430px] text-[18px] leading-[24px] text-zinc-600">
+          Seja um dos primeiros a desbravar um novo conceito de assistente virtual.
         </p>
-      )}
+      </div>
 
-      <div
-        ref={widgetRef}
-        className="mt-1"
-        aria-hidden={!siteKey}
-      />
+      <form className="flex w-full flex-col gap-[14px]" onSubmit={handleSubmit}>
+        <div className="flex flex-col gap-[8px]">
+          <label htmlFor="waitlist-name" className="text-[14px] font-semibold leading-[20px] text-zinc-900 font-['Inter',sans-serif]">
+            Nome
+          </label>
+          <div className="relative">
+            <span className="pointer-events-none absolute left-[12px] top-1/2 -translate-y-1/2 text-zinc-500">
+              {/* lucide/user icone */}
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </span>
+            <input
+              id="waitlist-name"
+              name="name"
+              type="text"
+              autoComplete="name"
+              maxLength={MAX_NAME_LENGTH}
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              className="flex h-[42px] w-full items-center gap-[12px] overflow-hidden rounded-[8px] border border-zinc-300 bg-white px-[12px] pl-[40px] text-[14px] text-zinc-900 outline-none transition focus-visible:ring-1 focus-visible:ring-zinc-900 placeholder:text-zinc-400"
+              placeholder=""
+            />
+          </div>
+        </div>
 
-      <button
-        type="submit"
-        disabled={status === "loading"}
-        className="mt-2 inline-flex h-12 items-center justify-center rounded-xl bg-[#0B0F1A] px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-[#111827] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111827]/20 disabled:cursor-not-allowed disabled:opacity-70"
-      >
-        {status === "loading" ? "Enviando..." : "Entrar na lista de espera"}
-      </button>
-    </form>
+        <div className="flex flex-col gap-[8px]">
+          <label htmlFor="waitlist-email" className="text-[14px] font-semibold leading-[20px] text-zinc-900 font-['Inter',sans-serif]">
+            E-mail
+          </label>
+          <div className="relative">
+            <span className="pointer-events-none absolute left-[12px] top-1/2 -translate-y-1/2 text-zinc-500">
+              {/* lucide/mail icone */}
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect width="20" height="16" x="2" y="4" rx="2" />
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+              </svg>
+            </span>
+            <input
+              id="waitlist-email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              maxLength={MAX_EMAIL_LENGTH}
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              className="flex h-[42px] w-full items-center gap-[12px] overflow-hidden rounded-[8px] border border-zinc-300 bg-white px-[12px] pl-[40px] text-[14px] text-zinc-900 outline-none transition focus-visible:ring-1 focus-visible:ring-zinc-900 placeholder:text-zinc-400"
+              placeholder=""
+            />
+          </div>
+        </div>
+
+        {status === "error" && (
+          <p className="text-sm text-red-600" role="alert">
+            {errorMessage}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          disabled={status === "loading"}
+          className="mt-2 flex h-[42px] w-full items-center justify-center gap-[10px] overflow-hidden rounded-[8px] bg-[#000625] px-[20px] py-[10px] text-[16px] font-semibold leading-[22px] tracking-[-0.112px] text-white transition hover:bg-[#0A1033] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70 font-['Inter',sans-serif]"
+        >
+          {status === "loading" ? "Enviando..." : "Entrar na lista de espera"}
+        </button>
+      </form>
+    </div>
   );
 }
