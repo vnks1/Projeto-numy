@@ -65,7 +65,7 @@ function Feature3Visual() {
 const FEATURES = [
   {
     tag: "Clareza, no meio do caos",
-    tagClassName: "text-[16px] rounded-[8px] bg-zinc-100 shadow-none",
+    tagClassName: "text-[14px] rounded-[8px] bg-zinc-100 shadow-none font-light",
     title: "Veja o que importa primeiro.",
     titleClassName: "font-medium",
     description:
@@ -75,7 +75,7 @@ const FEATURES = [
   },
   {
     tag: "Sempre presente",
-    tagClassName: "text-[16px] rounded-[8px] bg-zinc-100 shadow-none",
+    tagClassName: "text-[14px] rounded-[8px] bg-zinc-100 shadow-none font-light",
     title: "Comece seu dia sabendo o que importa.",
     titleClassName: "font-medium",
     description:
@@ -85,7 +85,7 @@ const FEATURES = [
   },
   {
     tag: "Pronta para tudo",
-    tagClassName: "text-[16px] rounded-[8px] bg-zinc-100 shadow-none",
+    tagClassName: "text-[14px] rounded-[8px] bg-zinc-100 shadow-none font-light",
     title: "Uma assistente pessoal para suas conversas.",
     titleClassName: "font-medium",
     description:
@@ -130,7 +130,7 @@ export default function Home() {
         </section>
 
         {/* Feature sections */}
-        <section className="relative z-10 bg-[#FFFFFF]">
+        <section id="como-funciona" className="relative z-10 bg-[#FFFFFF]">
           <div className="max-w-6xl mx-auto px-6 flex flex-col gap-8">
             {FEATURES.map((feature) => (
               <FeatureSection key={feature.tag} {...feature} />

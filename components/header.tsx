@@ -101,10 +101,8 @@ export function Header() {
                 top: 0,
                 zIndex: 50,
                 width: "100%",
-                transition: "background-color 0.3s ease, border-color 0.3s ease, backdrop-filter 0.3s ease",
-                backgroundColor: scrolled ? "rgba(255, 255, 255, 0.85)" : "transparent",
-                backdropFilter: scrolled ? "blur(12px)" : "none",
-                WebkitBackdropFilter: scrolled ? "blur(12px)" : "none",
+                transition: "background-color 0.3s ease, border-color 0.3s ease",
+                backgroundColor: scrolled ? "rgba(255, 255, 255, 0.9)" : "transparent",
                 borderBottom: scrolled ? "1px solid rgba(0,0,0,0.08)" : "1px solid transparent",
                 borderRadius: scrolled ? "0 0 12px 12px" : "0",
             }}
@@ -136,8 +134,6 @@ export function Header() {
 
                     <Link
                         href={WAITLIST_URL}
-                        target="_blank"
-                        rel="noreferrer"
                         className="inline-flex ml-8 items-center justify-center gap-1 rounded-[20px] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-900"
                     >
                         Garantir meu acesso
@@ -188,8 +184,6 @@ export function Header() {
                         </Link>
                         <Link
                             href={WAITLIST_URL}
-                            target="_blank"
-                            rel="noreferrer"
                             onClick={() => setMobileOpen(false)}
                             className="inline-flex w-full items-center justify-center gap-1 rounded-[20px] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-900"
                         >

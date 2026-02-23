@@ -97,7 +97,7 @@ export function Hero() {
 
                         <div className="flex flex-col items-center lg:items-end gap-3 w-full">
                             <RainbowButton asChild variant="default" className="inline-flex w-auto h-auto px-5 py-2.5">
-                                <Link href={WAITLIST_URL} target="_blank" rel="noreferrer">
+                                <Link href={WAITLIST_URL}>
                                     Entrar na lista de espera <ChevronRight aria-hidden="true" className="size-[14px]" />
                                 </Link>
                             </RainbowButton>
