@@ -77,7 +77,7 @@ const FEATURES = [
     title: "Veja o que importa primeiro.",
     titleClassName: "font-medium ",
     description:
-      "A Numa analisa suas conversas e destaca as mensagens que precisam de atenÃ§Ã£o imediata, para vocÃª nunca mais perder o que Ã© importante.",
+      "A Numa analisa suas conversas e destaca as mensagens que precisam de aten\u00e7\u00e3o imediata, para voc\u00ea nunca mais perder o que \u00e9 importante.",
     imageSide: "left" as const,
     visual: <Feature1Visual />,
   },
@@ -87,7 +87,7 @@ const FEATURES = [
     title: "Comece seu dia sabendo o que importa.",
     titleClassName: "font-medium",
     description:
-      "Toda manhÃ£, a Numa prepara um resumo personalizado com as prioridades do dia â€” reuniÃµes, mensagens importantes e lembretes.",
+      "Toda manhã, a Numa prepara um resumo personalizado com as prioridades do dia, reuniões, mensagens importantes e lembretes.",
     imageSide: "right" as const,
     visual: <Feature2Visual />,
   },
@@ -97,7 +97,7 @@ const FEATURES = [
     title: "Uma assistente pessoal para suas conversas.",
     titleClassName: "font-medium",
     description:
-      "Da sugestÃ£o de resposta ao acompanhamento de conversas importantes, a Numa estÃ¡ sempre pronta para te ajudar a se comunicar melhor.",
+      "Da sugestões de resposta ao acompanhamento de conversas importantes, a Numa está sempre pronta para te ajudar a se comunicar melhor.",
     imageSide: "left" as const,
     visual: <Feature3Visual />,
   },
