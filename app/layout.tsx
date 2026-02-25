@@ -50,6 +50,11 @@ export const metadata: Metadata = {
     description,
     images: ["/mockup.png"],
   },
+  icons: {
+    icon: "/icon.ico",
+    shortcut: "/icon.ico",
+    apple: "/icon.ico",
+  },
 };
 
 export default function RootLayout({
