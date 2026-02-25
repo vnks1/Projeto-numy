@@ -1,7 +1,6 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import { Check, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,18 +12,14 @@ import iphoneImg from "../src/iphone.png";
 setWasmUrl("/dotlottie-player.wasm");
 
 export function Hero() {
-    const isHydrated = useSyncExternalStore(
-        () => () => undefined,
-        () => true,
-        () => false
-    );
-    const reduceMotion = useReducedMotion();
-    const disableMotion = !isHydrated || reduceMotion;
 
     return (
-        <section
+        <motion.section
             id="hero"
             className="relative overflow-hidden min-h-screen flex items-start justify-start pt-12 lg:items-center lg:justify-center lg:pt-0"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
         >
             {/* Background circular arcs */}
             <BackgroundArcs />
@@ -35,9 +30,9 @@ export function Hero() {
                     {/* Column 1 â€” Title (Left) */}
                     <div className="flex w-full flex-col items-center text-center lg:items-start lg:text-left lg:col-span-4 order-1">
                         <motion.h1
-                            initial={disableMotion ? false : { opacity: 0, y: 20 }}
-                            animate={disableMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-                            transition={{ duration: 0.8, ease: "easeOut" }}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, ease: "easeOut", delay: 0.6 }}
                             className="text-[40px] sm:text-[48px] lg:text-[56px] font-medium text-[#111827] leading-[1.1] tracking-[-0.02em]"
                         >
                             <span className="font-semibold">Menos</span> ruído.
@@ -45,40 +40,40 @@ export function Hero() {
                             <span className="font-semibold">Mais</span> foco.
                         </motion.h1>
                         <motion.p
-                            initial={disableMotion ? false : { opacity: 0, y: 10 }}
-                            animate={disableMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, ease: "easeOut", delay: 0.72 }}
                         >
                             Clareza para o seu dia a dia.
                         </motion.p>
                         <motion.ul
-                            initial={disableMotion ? false : { opacity: 0, y: 10 }}
-                            animate={disableMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, ease: "easeOut", delay: 0.2 }}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, ease: "easeOut", delay: 0.82 }}
                             className="mt-6 space-y-2"
                         >
                             <motion.li
-                                initial={disableMotion ? false : { opacity: 0, y: 6 }}
-                                animate={disableMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-                                transition={{ duration: 0.35, ease: "easeOut", delay: 0.25 }}
+                                initial={{ opacity: 0, y: 6 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.35, ease: "easeOut", delay: 0.88 }}
                                 className="flex items-center gap-3"
                             >
                                 <Check aria-hidden="true" className="size-5 text-black" />
                                 <span>80% menos distrações</span>
                             </motion.li>
                             <motion.li
-                                initial={disableMotion ? false : { opacity: 0, y: 6 }}
-                                animate={disableMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-                                transition={{ duration: 0.35, ease: "easeOut", delay: 0.3 }}
+                                initial={{ opacity: 0, y: 6 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.35, ease: "easeOut", delay: 0.93 }}
                                 className="flex items-center gap-3"
                             >
                                 <Check aria-hidden="true" className="size-5 text-black" />
                                 <span>Decida 3x mais rápido</span>
                             </motion.li>
                             <motion.li
-                                initial={disableMotion ? false : { opacity: 0, y: 6 }}
-                                animate={disableMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-                                transition={{ duration: 0.35, ease: "easeOut", delay: 0.35 }}
+                                initial={{ opacity: 0, y: 6 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.35, ease: "easeOut", delay: 0.98 }}
                                 className="flex items-center gap-3"
                             >
                                 <Check aria-hidden="true" className="size-5 text-black" />
@@ -90,9 +85,9 @@ export function Hero() {
                     {/* Column 2 â€” iPhone (Center) */}
                     <div className="flex justify-center items-end lg:col-span-4 order-3 lg:order-2 relative mt-10 lg:mt-0">
                         <motion.div
-                            initial={disableMotion ? false : { opacity: 0, y: 80, scale: 0.97 }}
-                            animate={disableMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
-                            transition={{ duration: 0.9, ease: "easeOut" }}
+                            initial={{ opacity: 0, y: 400 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
                             className="relative z-10 w-full max-w-[320px] mx-auto"
                         >
                             <Image
@@ -107,9 +102,9 @@ export function Hero() {
 
                             {/* Floating Bubble 1 - Left */}
                             <motion.div
-                                initial={disableMotion ? false : { opacity: 0, x: -20 }}
-                                animate={disableMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
-                                transition={{ delay: 0.5, duration: 0.6 }}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 1.2, duration: 0.6 }}
                                 className="hidden sm:flex absolute left-[-90px] top-[65%] items-center gap-[6px] bg-white/90 backdrop-blur-sm border border-white/20 shadow-lg px-[12px] py-[6px] rounded-full z-20"
                             >
                                 <DotLottieReact
@@ -123,9 +118,9 @@ export function Hero() {
 
                             {/* Floating Bubble 2 - Right */}
                             <motion.div
-                                initial={disableMotion ? false : { opacity: 0, x: 20 }}
-                                animate={disableMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
-                                transition={{ delay: 0.7, duration: 0.6 }}
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 1.4, duration: 0.6 }}
                                 className="hidden sm:flex absolute right-[-90px] top-[30%] items-center gap-[6px] bg-white/90 backdrop-blur-sm border border-white/20 shadow-lg px-[12px] py-[6px] rounded-full z-20"
                             >
                                 <DotLottieReact
@@ -141,9 +136,9 @@ export function Hero() {
 
                     {/* Column 3 â€” Description + CTA (Right) */}
                     <motion.div
-                        initial={disableMotion ? false : { opacity: 0, y: 16 }}
-                        animate={disableMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-                        transition={{ duration: 0.7, ease: "easeOut", delay: 0.15 }}
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, ease: "easeOut", delay: 1.0 }}
                         className="flex w-full flex-col items-center text-center lg:items-end gap-6 lg:col-span-4 order-2 lg:order-3 lg:text-right"
                     >
                         <p className="text-[#4B5563] text-base sm:text-lg leading-relaxed max-w-[400px]">
@@ -167,7 +162,7 @@ export function Hero() {
 
                 </div>
             </div>
-        </section >
+        </motion.section>
     );
 }
 
