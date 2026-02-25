@@ -1,4 +1,4 @@
-# 🚀 Numa — Landing Page
+# 🚀 Numa - Landing Page
 
 Landing Page oficial do projeto **Numa**.
 
