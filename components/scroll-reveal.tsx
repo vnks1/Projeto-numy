@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -22,9 +23,14 @@ export function ScrollReveal({
   y = 16,
   amount = 0.2,
 }: ScrollRevealProps) {
+  const [isHydrated, setIsHydrated] = useState(false);
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
   const shouldReduceMotion = useReducedMotion();
+  const disableMotion = !isHydrated || shouldReduceMotion;
 
-  if (shouldReduceMotion) {
+  if (disableMotion) {
     return <div className={className}>{children}</div>;
   }
 

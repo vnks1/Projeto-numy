@@ -3,9 +3,27 @@ import Image from "next/image";
 import { Suspense } from "react";
 import { WaitlistForm } from "@/components/waitlist-form";
 
+const title = "NUMA - Lista de espera";
+const description =
+  "Garanta seu acesso antecipado a Numa e receba novidades em primeira mao.";
+
 export const metadata: Metadata = {
-  title: "NUMA — Lista de Espera",
-  description: "Garanta seu acesso antecipado à Numa e receba novidades em primeira mão.",
+  title,
+  description,
+  alternates: {
+    canonical: "/waitlist",
+  },
+  openGraph: {
+    title,
+    description,
+    url: "/waitlist",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+  },
 };
 
 export default function WaitlistPage() {
@@ -44,6 +62,7 @@ export default function WaitlistPage() {
               src="/mockup.png"
               alt="Mockup da interface"
               fill
+              sizes="(max-width: 768px) 0px, 50vw"
               className="object-contain object-right"
               priority
             />

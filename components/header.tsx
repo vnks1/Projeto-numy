@@ -86,11 +86,12 @@ export function Header() {
         };
 
         document.addEventListener("keydown", handleKeyDown);
+        const menuButtonElement = menuButtonRef.current;
 
         return () => {
             document.removeEventListener("keydown", handleKeyDown);
             document.body.style.overflow = previousOverflow;
-            menuButtonRef.current?.focus();
+            menuButtonElement?.focus();
         };
     }, [mobileOpen]);
 

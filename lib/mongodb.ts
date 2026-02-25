@@ -17,9 +17,7 @@ type WaitlistEntry = {
 };
 
 declare global {
-  // eslint-disable-next-line no-var
   var _mongoClientPromise: Promise<MongoClient> | undefined;
-  // eslint-disable-next-line no-var
   var _mongoIndexesEnsured: boolean | undefined;
 }
 

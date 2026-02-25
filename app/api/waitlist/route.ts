@@ -6,6 +6,7 @@ import { getWaitlistRatelimit } from "@/lib/ratelimit";
 type WaitlistPayload = {
   email?: string;
   name?: string | null;
+  website?: string | null;
   utm?: {
     source?: string;
     medium?: string;
@@ -20,6 +21,7 @@ const MAX_EMAIL_LENGTH = 254;
 const MAX_NAME_LENGTH = 80;
 const MAX_REFERRER_LENGTH = 500;
 const MAX_UTM_LENGTH = 120;
+const MAX_HONEYPOT_LENGTH = 120;
 
 const ALLOWED_EMAIL_DOMAINS = new Set([
   "gmail.com",
@@ -109,6 +111,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
   }
 
+  const requestOrigin = request.headers.get("origin");
+  const requestHost = request.headers.get("host");
+  if (requestOrigin && requestHost) {
+    try {
+      const parsedOrigin = new URL(requestOrigin);
+      if (parsedOrigin.host !== requestHost) {
+        return NextResponse.json({ error: "Forbidden origin", code: "INVALID_ORIGIN" }, { status: 403 });
+      }
+    } catch {
+      return NextResponse.json({ error: "Invalid origin", code: "INVALID_ORIGIN" }, { status: 400 });
+    }
+  }
+
   const emailRaw = typeof payload.email === "string" ? payload.email : "";
 
   if (emailRaw.length > MAX_EMAIL_LENGTH) {
@@ -129,15 +144,22 @@ export async function POST(request: Request) {
   }
 
   let name: string | null = null;
+  let website: string | null = null;
   let utm: WaitlistPayload["utm"] | undefined;
   let referrer: string | null = null;
 
   try {
     name = getOptionalString(payload.name, MAX_NAME_LENGTH) ?? null;
+    website = getOptionalString(payload.website, MAX_HONEYPOT_LENGTH) ?? null;
     utm = pickUtm(payload.utm);
     referrer = getOptionalString(payload.referrer, MAX_REFERRER_LENGTH) ?? null;
   } catch {
     return NextResponse.json({ error: "Invalid payload", code: "INVALID_PAYLOAD" }, { status: 400 });
+  }
+
+  // Honeypot field expected to stay empty for legitimate users.
+  if (website) {
+    return NextResponse.json({ status: "ok" });
   }
 
   const isProd = process.env.NODE_ENV === "production";

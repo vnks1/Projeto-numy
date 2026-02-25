@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { useSearchParams } from "next/navigation";
+import { useMemo, useState, type FormEvent } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 
 type Status = "idle" | "loading" | "success" | "error";
 
@@ -31,16 +32,16 @@ const ALLOWED_EMAIL_DOMAINS = new Set([
 ]);
 
 export function WaitlistForm() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [errorMessage, setErrorMessage] = useState("");
-  const [referrer, setReferrer] = useState<string | null>(null);
-
-  useEffect(() => {
-    setReferrer(document.referrer || null);
-  }, []);
+  const [referrer] = useState<string | null>(() =>
+    typeof document !== "undefined" ? document.referrer || null : null
+  );
+  const [website, setWebsite] = useState("");
 
   const utm = useMemo<UTM>(() => {
     return {
@@ -88,6 +89,7 @@ export function WaitlistForm() {
           email: emailValue,
           utm,
           referrer,
+          website,
         }),
       });
 
@@ -138,6 +140,14 @@ export function WaitlistForm() {
   return (
     <div className="flex w-full flex-col">
       <div className="mb-8 flex flex-col gap-1.5">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          aria-label="Voltar"
+          className="-mt-6 mb-8 inline-flex h-10 w-10 items-center justify-center self-start rounded-full border border-zinc-200 bg-white text-black transition hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2"
+        >
+          <ArrowLeft size={18} strokeWidth={2.25} aria-hidden="true" />
+        </button>
         <h1 className="text-[24px] font-bold leading-[32px] tracking-[-0.288px] text-zinc-900">
           Garanta seu acesso antecipado!
         </h1>
@@ -147,6 +157,19 @@ export function WaitlistForm() {
       </div>
 
       <form className="flex w-full flex-col gap-[14px]" onSubmit={handleSubmit}>
+        <div className="hidden" aria-hidden="true">
+          <label htmlFor="waitlist-website">Website</label>
+          <input
+            id="waitlist-website"
+            name="website"
+            type="text"
+            autoComplete="off"
+            tabIndex={-1}
+            value={website}
+            onChange={(event) => setWebsite(event.target.value)}
+          />
+        </div>
+
         <div className="flex flex-col gap-[8px]">
           <label htmlFor="waitlist-name" className="text-[14px] font-semibold leading-[20px] text-zinc-900 font-['Inter',sans-serif]">
             Nome

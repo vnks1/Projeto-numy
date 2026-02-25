@@ -11,13 +11,18 @@ function Feature1Visual() {
   return (
     <FeatureCard>
       <div className="absolute inset-0">
-        <Image
-          src="/gif1.gif"
-          alt="Clareza no meio do caos"
-          fill
-          unoptimized
+        <video
           className="w-full h-full object-cover"
-        />
+          autoPlay
+          loop
+          muted
+          playsInline
+          aria-label="Clareza no meio do caos"
+          role="img"
+          preload="metadata"
+        >
+          <source src="/feature1.webm" type="video/webm" />
+        </video>
       </div>
     </FeatureCard>
   );
@@ -27,13 +32,18 @@ function Feature2Visual() {
   return (
     <FeatureCard>
       <div className="absolute inset-0">
-        <Image
-          src="/gif2.gif"
-          alt="Resumo do dia"
-          fill
-          unoptimized
+        <video
           className="w-full h-full object-cover"
-        />
+          autoPlay
+          loop
+          muted
+          playsInline
+          aria-label="Resumo do dia"
+          role="img"
+          preload="metadata"
+        >
+          <source src="/feature2.webm" type="video/webm" />
+        </video>
       </div>
     </FeatureCard>
   );
@@ -43,13 +53,18 @@ function Feature3Visual() {
   return (
     <FeatureCard>
       <div className="absolute inset-0">
-        <Image
-          src="/gif3.gif"
-          alt="Assistente pessoal"
-          fill
-          unoptimized
+        <video
           className="w-full h-full object-cover"
-        />
+          autoPlay
+          loop
+          muted
+          playsInline
+          aria-label="Assistente pessoal"
+          role="img"
+          preload="metadata"
+        >
+          <source src="/feature3.webm" type="video/webm" />
+        </video>
       </div>
     </FeatureCard>
   );
@@ -58,7 +73,7 @@ function Feature3Visual() {
 const FEATURES = [
   {
     tag: "Clareza, no meio do caos",
-    tagClassName: "text-[14px] rounded-[8px] bg-zinc-100 shadow-none font-light text-zinc-800",
+    tagClassName: "text-[14px] rounded-[8px] bg-zinc-100 border-zinc-100 shadow-none font-light text-zinc-800",
     title: "Veja o que importa primeiro.",
     titleClassName: "font-medium ",
     description:
@@ -68,7 +83,7 @@ const FEATURES = [
   },
   {
     tag: "Sempre presente",
-    tagClassName: "text-[14px] rounded-[8px] bg-zinc-100 shadow-none font-light text-zinc-800",
+    tagClassName: "text-[14px] rounded-[8px] bg-zinc-100 border-zinc-100 shadow-none font-light text-zinc-800",
     title: "Comece seu dia sabendo o que importa.",
     titleClassName: "font-medium",
     description:
@@ -78,7 +93,7 @@ const FEATURES = [
   },
   {
     tag: "Pronta para tudo",
-    tagClassName: "text-[14px] rounded-[8px] bg-zinc-100 shadow-none font-light text-zinc-800",
+    tagClassName: "text-[14px] rounded-[8px] bg-zinc-100 border-zinc-100 shadow-none font-light text-zinc-800",
     title: "Uma assistente pessoal para suas conversas.",
     titleClassName: "font-medium",
     description:
@@ -147,5 +162,10 @@ export default function Home() {
     </>
   );
 }
+
+
+
+
+
 
 

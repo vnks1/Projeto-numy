@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "preflight:prod": "node --env-file=.env.local scripts/preflight-prod.mjs"
   },

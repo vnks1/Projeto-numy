@@ -210,4 +210,10 @@ section[id] {
   body {
     @apply bg-background text-foreground;
   }
+  input,
+  textarea,
+  select,
+  button {
+    font-family: var(--font-inter), var(--font-inter-tight), sans-serif;
+  }
 }

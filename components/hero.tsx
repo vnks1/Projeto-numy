@@ -1,18 +1,29 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { ChevronRight } from "lucide-react";
+import { useSyncExternalStore } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { Check, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import { DotLottieReact, setWasmUrl } from "@lottiefiles/dotlottie-react";
 import { RainbowButton } from "@/components/ui/rainbow-button";
 import { WAITLIST_URL } from "@/lib/site-config";
 import iphoneImg from "../src/iphone.png";
 
+setWasmUrl("/dotlottie-player.wasm");
+
 export function Hero() {
+    const isHydrated = useSyncExternalStore(
+        () => () => undefined,
+        () => true,
+        () => false
+    );
+    const reduceMotion = useReducedMotion();
+    const disableMotion = !isHydrated || reduceMotion;
+
     return (
         <section
-            id="como-funciona"
+            id="hero"
             className="relative overflow-hidden min-h-screen flex items-start justify-start pt-12 lg:items-center lg:justify-center lg:pt-0"
         >
             {/* Background circular arcs */}
@@ -21,23 +32,66 @@ export function Hero() {
             <div className="relative z-10 max-w-7xl mx-auto px-6 w-full">
                 <div className="flex flex-col items-center gap-6 sm:gap-8 lg:grid lg:grid-cols-12 lg:items-center lg:gap-12">
 
-                    {/* Column 1 — Title (Left) */}
+                    {/* Column 1 â€” Title (Left) */}
                     <div className="flex w-full flex-col items-center text-center lg:items-start lg:text-left lg:col-span-4 order-1">
                         <motion.h1
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
+                            initial={disableMotion ? false : { opacity: 0, y: 20 }}
+                            animate={disableMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
                             transition={{ duration: 0.8, ease: "easeOut" }}
                             className="text-[40px] sm:text-[48px] lg:text-[56px] font-medium text-[#111827] leading-[1.1] tracking-[-0.02em]"
                         >
-                            Sua assistente pessoal para organizar sua rotina e suas conversas.
+                            <span className="font-semibold">Menos</span> ruído.
+                            <br />
+                            <span className="font-semibold">Mais</span> foco.
                         </motion.h1>
+                        <motion.p
+                            initial={disableMotion ? false : { opacity: 0, y: 10 }}
+                            animate={disableMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
+                        >
+                            Clareza para o seu dia a dia.
+                        </motion.p>
+                        <motion.ul
+                            initial={disableMotion ? false : { opacity: 0, y: 10 }}
+                            animate={disableMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, ease: "easeOut", delay: 0.2 }}
+                            className="mt-6 space-y-2"
+                        >
+                            <motion.li
+                                initial={disableMotion ? false : { opacity: 0, y: 6 }}
+                                animate={disableMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                                transition={{ duration: 0.35, ease: "easeOut", delay: 0.25 }}
+                                className="flex items-center gap-3"
+                            >
+                                <Check aria-hidden="true" className="size-5 text-black" />
+                                <span>80% menos distrações</span>
+                            </motion.li>
+                            <motion.li
+                                initial={disableMotion ? false : { opacity: 0, y: 6 }}
+                                animate={disableMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                                transition={{ duration: 0.35, ease: "easeOut", delay: 0.3 }}
+                                className="flex items-center gap-3"
+                            >
+                                <Check aria-hidden="true" className="size-5 text-black" />
+                                <span>Decida 3x mais rápido</span>
+                            </motion.li>
+                            <motion.li
+                                initial={disableMotion ? false : { opacity: 0, y: 6 }}
+                                animate={disableMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                                transition={{ duration: 0.35, ease: "easeOut", delay: 0.35 }}
+                                className="flex items-center gap-3"
+                            >
+                                <Check aria-hidden="true" className="size-5 text-black" />
+                                <span>Economiza até 2 horas por dia</span>
+                            </motion.li>
+                        </motion.ul>
                     </div>
 
-                    {/* Column 2 — iPhone (Center) */}
+                    {/* Column 2 â€” iPhone (Center) */}
                     <div className="flex justify-center items-end lg:col-span-4 order-3 lg:order-2 relative mt-10 lg:mt-0">
                         <motion.div
-                            initial={{ opacity: 0, y: 80, scale: 0.97 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            initial={disableMotion ? false : { opacity: 0, y: 80, scale: 0.97 }}
+                            animate={disableMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
                             transition={{ duration: 0.9, ease: "easeOut" }}
                             className="relative z-10 w-full max-w-[320px] mx-auto"
                         >
@@ -47,13 +101,14 @@ export function Hero() {
                                 width={600}
                                 height={1217}
                                 className="w-full h-auto object-contain drop-shadow-2xl"
+                                sizes="(max-width: 1024px) 85vw, 320px"
                                 priority
                             />
 
                             {/* Floating Bubble 1 - Left */}
                             <motion.div
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
+                                initial={disableMotion ? false : { opacity: 0, x: -20 }}
+                                animate={disableMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
                                 transition={{ delay: 0.5, duration: 0.6 }}
                                 className="hidden sm:flex absolute left-[-90px] top-[65%] items-center gap-[6px] bg-white/90 backdrop-blur-sm border border-white/20 shadow-lg px-[12px] py-[6px] rounded-full z-20"
                             >
@@ -68,8 +123,8 @@ export function Hero() {
 
                             {/* Floating Bubble 2 - Right */}
                             <motion.div
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
+                                initial={disableMotion ? false : { opacity: 0, x: 20 }}
+                                animate={disableMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
                                 transition={{ delay: 0.7, duration: 0.6 }}
                                 className="hidden sm:flex absolute right-[-90px] top-[30%] items-center gap-[6px] bg-white/90 backdrop-blur-sm border border-white/20 shadow-lg px-[12px] py-[6px] rounded-full z-20"
                             >
@@ -84,15 +139,15 @@ export function Hero() {
                         </motion.div>
                     </div>
 
-                    {/* Column 3 — Description + CTA (Right) */}
+                    {/* Column 3 â€” Description + CTA (Right) */}
                     <motion.div
-                        initial={{ opacity: 0, y: 16 }}
-                        animate={{ opacity: 1, y: 0 }}
+                        initial={disableMotion ? false : { opacity: 0, y: 16 }}
+                        animate={disableMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
                         transition={{ duration: 0.7, ease: "easeOut", delay: 0.15 }}
                         className="flex w-full flex-col items-center text-center lg:items-end gap-6 lg:col-span-4 order-2 lg:order-3 lg:text-right"
                     >
                         <p className="text-[#4B5563] text-base sm:text-lg leading-relaxed max-w-[400px]">
-                            A Numa entende suas mensagens, resume conversas e ajuda você a focar no que realmente importa.
+                            A Numa resume, prioriza e organiza suas mensagens automaticamente.
                         </p>
 
                         <div className="flex flex-col items-center lg:items-end gap-3 w-full">
@@ -104,7 +159,7 @@ export function Hero() {
 
                             <p className="text-[#6B7280] text-sm">
                                 Mais de{" "}
-                                <span className="font-semibold text-[#111827]">5.285</span>{" "}
+                                <span className="font-semibold text-[#111827]">5,285</span>{" "}
                                 cadastrados
                             </p>
                         </div>
@@ -131,3 +186,4 @@ function BackgroundArcs() {
         </svg>
     );
 }
+
