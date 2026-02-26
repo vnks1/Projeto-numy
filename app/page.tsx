@@ -1,12 +1,31 @@
 ﻿import Image from "next/image";
+import AnimatedBeamMultipleOutputDemo from "@/registry/example/animated-beam-multiple-outputs";
 import { Header } from "@/components/header";
-import { Hero } from "@/components/hero";
+import { Hero, SocialsMarquee } from "@/components/hero";
 import { FeatureSection, FeatureCard } from "@/components/feature-section";
 import { FAQ } from "@/components/faq";
 import { Footer } from "@/components/footer";
 import { ScrollReveal } from "@/components/scroll-reveal";
 
 // Feature section visuals
+export function BentoIntegrations() {
+  return (
+    <AnimatedBeamMultipleOutputDemo
+      className="absolute inset-0 m-auto h-full w-full border-none bg-transparent backdrop-blur-none transition-all duration-300 ease-out group-hover:scale-105"
+    />
+  );
+}
+
+function Feature0Visual() {
+  return (
+    <FeatureCard>
+      <div className="absolute inset-0 z-10">
+        <BentoIntegrations />
+      </div>
+    </FeatureCard>
+  );
+}
+
 function Feature1Visual() {
   return (
     <FeatureCard>
@@ -52,9 +71,9 @@ function Feature2Visual() {
 function Feature3Visual() {
   return (
     <FeatureCard>
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 bg-[#FBFBFB] flex items-center justify-center">
         <video
-          className="w-full h-full object-cover"
+          className="w-[95%] h-[95%] object-contain rounded-xl"
           autoPlay
           loop
           muted
@@ -71,6 +90,16 @@ function Feature3Visual() {
 }
 
 const FEATURES = [
+  {
+    tag: "Tudo em um só lugar",
+    tagClassName: "text-[14px] rounded-[8px] bg-zinc-100 border-zinc-100 shadow-none font-light text-zinc-800",
+    title: "Unifique seus canais de comunicação.",
+    titleClassName: "font-medium ",
+    description:
+      "A Numa conecta suas mensagens, centraliza conversas e ajuda você a gerenciar tudo sem trocar de aplicativo.",
+    imageSide: "right" as const,
+    visual: <Feature0Visual />,
+  },
   {
     tag: "Clareza, no meio do caos",
     tagClassName: "text-[14px] rounded-[8px] bg-zinc-100 border-zinc-100 shadow-none font-light text-zinc-800",
@@ -126,6 +155,7 @@ export default function Home() {
       <main>
         {/* Hero */}
         <Hero />
+        <SocialsMarquee />
 
         {/* Supporting headline */}
         <ScrollReveal>
@@ -162,6 +192,12 @@ export default function Home() {
     </>
   );
 }
+
+
+
+
+
+
 
 
 

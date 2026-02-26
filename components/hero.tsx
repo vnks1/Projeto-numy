@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Check, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { DotLottieReact, setWasmUrl } from "@lottiefiles/dotlottie-react";
 import { RainbowButton } from "@/components/ui/rainbow-button";
 import { WAITLIST_URL } from "@/lib/site-config";
@@ -77,7 +78,7 @@ export function Hero() {
                                 className="flex items-center gap-3"
                             >
                                 <Check aria-hidden="true" className="size-5 text-black" />
-                                <span>Economiza até 2 horas por dia</span>
+                                <span>Economize até 2 horas por dia</span>
                             </motion.li>
                         </motion.ul>
                     </div>
@@ -162,7 +163,59 @@ export function Hero() {
 
                 </div>
             </div>
+
         </motion.section>
+    );
+}
+
+export function SocialsMarquee() {
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const mediaQuery = window.matchMedia("(max-width: 639px)");
+        const updateIsMobile = () => setIsMobile(mediaQuery.matches);
+
+        updateIsMobile();
+        mediaQuery.addEventListener("change", updateIsMobile);
+
+        return () => mediaQuery.removeEventListener("change", updateIsMobile);
+    }, []);
+
+    return (
+        <div className="relative z-10 w-full mt-10 sm:mt-12 py-6 sm:py-7 overflow-hidden">
+            <p className="text-center text-[11px] sm:text-xs font-medium tracking-[0.28em] text-[#4B5563] uppercase">
+                INTEGRAÇÃO COM AS PRINCIPAIS PLATAFORMAS
+            </p>
+
+            <div className="mt-7 sm:mt-8 overflow-hidden" aria-hidden="true">
+                <motion.div
+                    className="flex w-max"
+                    animate={{ x: ["0%", "-50%"] }}
+                    transition={{ duration: isMobile ? 30 : 40, ease: "linear", repeat: Infinity }}
+                >
+                    <div className="shrink-0 pr-6 sm:pr-8">
+                        <Image
+                            src="/socials.svg"
+                            alt=""
+                            width={1440}
+                            height={39}
+                            className="h-[25px] sm:h-[30px] md:h-[30px] w-auto max-w-none"
+                            sizes="100vw"
+                        />
+                    </div>
+                    <div className="shrink-0 pr-6 sm:pr-8">
+                        <Image
+                            src="/socials.svg"
+                            alt=""
+                            width={1440}
+                            height={39}
+                            className="h-[25px] sm:h-[30px] md:h-[30px] w-auto max-w-none"
+                            sizes="100vw"
+                        />
+                    </div>
+                </motion.div>
+            </div>
+        </div>
     );
 }
 

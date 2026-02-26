@@ -7,6 +7,12 @@ type WaitlistPayload = {
   email?: string;
   name?: string | null;
   website?: string | null;
+  onboarding?: {
+    messageVolume?: string;
+    painPoint?: string;
+    routineChannel?: string;
+    weeklyNotificationHours?: string;
+  };
   utm?: {
     source?: string;
     medium?: string;
@@ -22,13 +28,7 @@ const MAX_NAME_LENGTH = 80;
 const MAX_REFERRER_LENGTH = 500;
 const MAX_UTM_LENGTH = 120;
 const MAX_HONEYPOT_LENGTH = 120;
-
-const ALLOWED_EMAIL_DOMAINS = new Set([
-  "gmail.com",
-  "icloud.com",
-  "hotmail.com",
-  "outlook.com",
-]);
+const MAX_ONBOARDING_FIELD_LENGTH = 120;
 
 function normalizeEmail(value: string) {
   return value.trim().toLowerCase();
@@ -36,11 +36,6 @@ function normalizeEmail(value: string) {
 
 function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-}
-
-function isAllowedEmailDomain(email: string) {
-  const domain = email.split("@")[1]?.toLowerCase();
-  return Boolean(domain && ALLOWED_EMAIL_DOMAINS.has(domain));
 }
 
 function getOptionalString(input: unknown, maxLength: number) {
@@ -75,6 +70,25 @@ function pickUtm(input?: WaitlistPayload["utm"]) {
 
   const hasValue = Object.values(utm).some(Boolean);
   return hasValue ? utm : undefined;
+}
+
+function pickOnboarding(input?: WaitlistPayload["onboarding"]) {
+  if (!input) {
+    return undefined;
+  }
+
+  const onboarding = {
+    messageVolume: getOptionalString(input.messageVolume, MAX_ONBOARDING_FIELD_LENGTH),
+    painPoint: getOptionalString(input.painPoint, MAX_ONBOARDING_FIELD_LENGTH),
+    routineChannel: getOptionalString(input.routineChannel, MAX_ONBOARDING_FIELD_LENGTH),
+    weeklyNotificationHours: getOptionalString(
+      input.weeklyNotificationHours,
+      MAX_ONBOARDING_FIELD_LENGTH
+    ),
+  };
+
+  const hasValue = Object.values(onboarding).some(Boolean);
+  return hasValue ? onboarding : undefined;
 }
 
 function getClientIp(headers: Headers) {
@@ -135,23 +149,17 @@ export async function POST(request: Request) {
   if (!email || !isValidEmail(email)) {
     return NextResponse.json({ error: "Invalid email", code: "INVALID_EMAIL" }, { status: 400 });
   }
-
-  if (!isAllowedEmailDomain(email)) {
-    return NextResponse.json(
-      { error: "Esse tipo de E-mail não é permitido", code: "INVALID_EMAIL_DOMAIN" },
-      { status: 400 }
-    );
-  }
-
   let name: string | null = null;
   let website: string | null = null;
   let utm: WaitlistPayload["utm"] | undefined;
+  let onboarding: WaitlistPayload["onboarding"] | undefined;
   let referrer: string | null = null;
 
   try {
     name = getOptionalString(payload.name, MAX_NAME_LENGTH) ?? null;
     website = getOptionalString(payload.website, MAX_HONEYPOT_LENGTH) ?? null;
     utm = pickUtm(payload.utm);
+    onboarding = pickOnboarding(payload.onboarding);
     referrer = getOptionalString(payload.referrer, MAX_REFERRER_LENGTH) ?? null;
   } catch {
     return NextResponse.json({ error: "Invalid payload", code: "INVALID_PAYLOAD" }, { status: 400 });
@@ -203,6 +211,9 @@ export async function POST(request: Request) {
 
     if (utm) {
       updateSet.utm = utm;
+    }
+    if (onboarding) {
+      updateSet.onboarding = onboarding;
     }
 
     await collection.updateOne(

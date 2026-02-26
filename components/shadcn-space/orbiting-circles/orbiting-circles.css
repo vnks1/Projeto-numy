@@ -1,0 +1,22 @@
+.orbiting-circle-track {
+  position: absolute;
+  inset: 0;
+  transform-origin: center;
+  animation-name: orbit-spin;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.orbiting-circle-track.reverse {
+  animation-direction: reverse;
+}
+
+@keyframes orbit-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
