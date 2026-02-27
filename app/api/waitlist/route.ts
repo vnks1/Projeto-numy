@@ -3,6 +3,8 @@ import { createHash } from "crypto";
 import { getWaitlistCollection } from "@/lib/mongodb";
 import { getWaitlistRatelimit } from "@/lib/ratelimit";
 
+export const runtime = "nodejs";
+
 type WaitlistPayload = {
   email?: string;
   name?: string | null;
@@ -95,146 +97,152 @@ function getClientIp(headers: Headers) {
   const cfIp = headers.get("cf-connecting-ip");
   const forwarded = headers.get("x-forwarded-for");
   const realIp = headers.get("x-real-ip");
-  const ip =
-    cfIp?.trim() ||
-    forwarded?.split(",")[0]?.trim() ||
-    realIp?.trim() ||
-    null;
+  const ip = cfIp?.trim() || forwarded?.split(",")[0]?.trim() || realIp?.trim() || null;
   return ip;
 }
 
 function getIpHash(headers: Headers, salt: string) {
   const ip = getClientIp(headers);
-  if (!ip) {
-    return null;
-  }
-
+  if (!ip) return null;
   return createHash("sha256").update(`${salt}${ip}`).digest("hex");
 }
 
 export async function POST(request: Request) {
-  let payload: WaitlistPayload;
-
   try {
-    payload = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
-  }
+    let payload: WaitlistPayload;
 
-  if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
-    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
-  }
-
-  const requestOrigin = request.headers.get("origin");
-  const requestHost = request.headers.get("host");
-  if (requestOrigin && requestHost) {
     try {
-      const parsedOrigin = new URL(requestOrigin);
-      if (parsedOrigin.host !== requestHost) {
-        return NextResponse.json({ error: "Forbidden origin", code: "INVALID_ORIGIN" }, { status: 403 });
-      }
+      payload = await request.json();
     } catch {
-      return NextResponse.json({ error: "Invalid origin", code: "INVALID_ORIGIN" }, { status: 400 });
+      return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
     }
-  }
 
-  const emailRaw = typeof payload.email === "string" ? payload.email : "";
+    console.log("BODY RECEIVED:", payload);
 
-  if (emailRaw.length > MAX_EMAIL_LENGTH) {
-    return NextResponse.json({ error: "Invalid email" }, { status: 400 });
-  }
+    if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+      return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+    }
 
-  const email = normalizeEmail(emailRaw);
+    const requestOrigin = request.headers.get("origin");
+    const requestHost = request.headers.get("host");
+    if (requestOrigin && requestHost) {
+      try {
+        const parsedOrigin = new URL(requestOrigin);
+        if (parsedOrigin.host !== requestHost) {
+          return NextResponse.json(
+            { error: "Forbidden origin", code: "INVALID_ORIGIN" },
+            { status: 403 }
+          );
+        }
+      } catch {
+        return NextResponse.json({ error: "Invalid origin", code: "INVALID_ORIGIN" }, { status: 400 });
+      }
+    }
 
-  if (!email || !isValidEmail(email)) {
-    return NextResponse.json({ error: "Invalid email", code: "INVALID_EMAIL" }, { status: 400 });
-  }
-  let name: string | null = null;
-  let website: string | null = null;
-  let utm: WaitlistPayload["utm"] | undefined;
-  let onboarding: WaitlistPayload["onboarding"] | undefined;
-  let referrer: string | null = null;
+    const emailRaw = typeof payload.email === "string" ? payload.email : "";
 
-  try {
-    name = getOptionalString(payload.name, MAX_NAME_LENGTH) ?? null;
-    website = getOptionalString(payload.website, MAX_HONEYPOT_LENGTH) ?? null;
-    utm = pickUtm(payload.utm);
-    onboarding = pickOnboarding(payload.onboarding);
-    referrer = getOptionalString(payload.referrer, MAX_REFERRER_LENGTH) ?? null;
-  } catch {
-    return NextResponse.json({ error: "Invalid payload", code: "INVALID_PAYLOAD" }, { status: 400 });
-  }
+    if (emailRaw.length > MAX_EMAIL_LENGTH) {
+      return NextResponse.json({ error: "Invalid email" }, { status: 400 });
+    }
 
-  // Honeypot field expected to stay empty for legitimate users.
-  if (website) {
+    const email = normalizeEmail(emailRaw);
+
+    if (!email || !isValidEmail(email)) {
+      return NextResponse.json({ error: "Invalid email", code: "INVALID_EMAIL" }, { status: 400 });
+    }
+
+    let name: string | null = null;
+    let website: string | null = null;
+    let utm: WaitlistPayload["utm"] | undefined;
+    let onboarding: WaitlistPayload["onboarding"] | undefined;
+    let referrer: string | null = null;
+
+    try {
+      name = getOptionalString(payload.name, MAX_NAME_LENGTH) ?? null;
+      website = getOptionalString(payload.website, MAX_HONEYPOT_LENGTH) ?? null;
+      utm = pickUtm(payload.utm);
+      onboarding = pickOnboarding(payload.onboarding);
+      referrer = getOptionalString(payload.referrer, MAX_REFERRER_LENGTH) ?? null;
+    } catch {
+      return NextResponse.json({ error: "Invalid payload", code: "INVALID_PAYLOAD" }, { status: 400 });
+    }
+
+    // Honeypot field expected to stay empty for legitimate users.
+    if (website) {
+      return NextResponse.json({ status: "ok" });
+    }
+
+    const isProd = process.env.NODE_ENV === "production";
+    const ipSalt = process.env.IP_HASH_SALT;
+
+    if (isProd && !ipSalt) {
+      console.error("IP_HASH_SALT_MISSING");
+      return NextResponse.json(
+        { error: "Server misconfigured", code: "IP_HASH_SALT_MISSING" },
+        { status: 500 }
+      );
+    }
+
+    const clientIp = getClientIp(request.headers);
+    const ipHash = ipSalt ? getIpHash(request.headers, ipSalt) : null;
+
+    // ✅ Option B: Rate limit is OPTIONAL. If not configured, it is disabled (no 500).
+    let ratelimit: null | { limit: (key: string) => Promise<{ success: boolean }> } = null;
+
+    try {
+      ratelimit = getWaitlistRatelimit();
+    } catch (err) {
+      console.warn("RATE_LIMIT_DISABLED:", err);
+      ratelimit = null;
+    }
+
+    if (ratelimit) {
+      const rateKey = ipHash ?? clientIp ?? "unknown";
+      const { success } = await ratelimit.limit(rateKey);
+      if (!success) {
+        return NextResponse.json({ error: "Rate limited", code: "RATE_LIMITED" }, { status: 429 });
+      }
+    }
+
+    try {
+      const collection = await getWaitlistCollection();
+
+      const updateSet: Record<string, unknown> = {
+        name,
+        source: "waitlist",
+        referrer,
+        ipHash,
+      };
+
+      if (utm) updateSet.utm = utm;
+      if (onboarding) updateSet.onboarding = onboarding;
+
+      await collection.updateOne(
+        { email },
+        {
+          $setOnInsert: { createdAt: new Date() },
+          $set: updateSet,
+        },
+        { upsert: true }
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Database error";
+      const isMissingUri = typeof message === "string" && message.includes("MONGODB_URI");
+
+      console.error("WAITLIST_DB_ERROR:", error);
+
+      return NextResponse.json(
+        {
+          error: isMissingUri ? "Database not configured" : "Database error",
+          code: isMissingUri ? "DB_NOT_CONFIGURED" : "DB_ERROR",
+        },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json({ status: "ok" });
+  } catch (err) {
+    console.error("WAITLIST_ERROR:", err);
+    return NextResponse.json({ ok: false, error: "Internal error" }, { status: 500 });
   }
-
-  const isProd = process.env.NODE_ENV === "production";
-  const ipSalt = process.env.IP_HASH_SALT;
-  if (isProd && !ipSalt) {
-    return NextResponse.json(
-      { error: "Server misconfigured", code: "IP_HASH_SALT_MISSING" },
-      { status: 500 }
-    );
-  }
-
-  const clientIp = getClientIp(request.headers);
-  const ipHash = ipSalt ? getIpHash(request.headers, ipSalt) : null;
-
-  let ratelimit = null;
-  try {
-    ratelimit = getWaitlistRatelimit();
-  } catch {
-    return NextResponse.json(
-      { error: "Server misconfigured", code: "RATE_LIMIT_NOT_CONFIGURED" },
-      { status: 500 }
-    );
-  }
-
-  if (ratelimit) {
-    const rateKey = ipHash ?? clientIp ?? "unknown";
-    const { success } = await ratelimit.limit(rateKey);
-    if (!success) {
-      return NextResponse.json({ error: "Rate limited", code: "RATE_LIMITED" }, { status: 429 });
-    }
-  }
-
-  try {
-    const collection = await getWaitlistCollection();
-    const updateSet: Record<string, unknown> = {
-      name,
-      source: "waitlist",
-      referrer,
-      ipHash,
-    };
-
-    if (utm) {
-      updateSet.utm = utm;
-    }
-    if (onboarding) {
-      updateSet.onboarding = onboarding;
-    }
-
-    await collection.updateOne(
-      { email },
-      {
-        $setOnInsert: { createdAt: new Date() },
-        $set: updateSet,
-      },
-      { upsert: true }
-    );
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Database error";
-    const isMissingUri = message.includes("MONGODB_URI");
-    return NextResponse.json(
-      {
-        error: isMissingUri ? "Database not configured" : "Database error",
-        code: isMissingUri ? "DB_NOT_CONFIGURED" : "DB_ERROR",
-      },
-      { status: 500 }
-    );
-  }
-
-  return NextResponse.json({ status: "ok" });
 }
