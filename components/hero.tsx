@@ -162,7 +162,7 @@ export function Hero() {
                   className="w-6 h-6 object-contain"
                 />
                 <span className="text-[12px] font-medium text-gray-800 whitespace-nowrap">
-                  Resumindo últimas mensagens...
+                  Resumindo suas últimas mensagens...
                 </span>
               </motion.div>
             </motion.div>
@@ -178,7 +178,7 @@ export function SocialsMarquee() {
   return (
     <div className="relative z-10 w-full mt-10 sm:mt-12 py-6 sm:py-7">
       <p className="text-center text-[11px] sm:text-xs font-medium tracking-[0.28em] text-[#4B5563] uppercase">
-        INTEGRAÇÃO COM AS PRINCIPAIS PLATAFORMAS
+        INTEGRAÇÃO COM AS PRINCIPAIS PLATAFORMAS DO MERCADO
       </p>
 
       <Marquee className="mt-7 sm:mt-8" aria-hidden="true">
