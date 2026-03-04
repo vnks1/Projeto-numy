@@ -1,0 +1,19 @@
+{
+  "gitignore": true,
+  "pattern": "**/*.{ts,tsx,js,jsx,mjs,cjs}",
+  "ignore": [
+    "**/node_modules/**",
+    "**/.next/**",
+    "**/out/**",
+    "**/build/**",
+    "**/coverage/**",
+    "**/*.d.ts"
+  ],
+  "minLines": 8,
+  "maxLines": 5000,
+  "maxSize": "2mb",
+  "minTokens": 70,
+  "reporters": ["console"],
+  "mode": "mild",
+  "threshold": 0
+}
